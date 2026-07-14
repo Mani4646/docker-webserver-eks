@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-webserver-service
+  labels:
+    app: simple-webserver
+spec:
+  type: LoadBalancer
+  selector:
+    app: simple-webserver
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5000
+    name: http
