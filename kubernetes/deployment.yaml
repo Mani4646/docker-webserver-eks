@@ -1,46 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: simple-webserver
-  labels:
-    app: simple-webserver
+  name: nginx-deployment
 spec:
-  replicas: 3
+  replicas: 2   # run 2 pods for redundancy
   selector:
     matchLabels:
-      app: simple-webserver
+      app: nginx
   template:
     metadata:
       labels:
-        app: simple-webserver
+        app: nginx
     spec:
       containers:
-      - name: webserver
-        image: your-ecr-repo/simple-webserver:latest
-        imagePullPolicy: IfNotPresent
+      - name: nginx
+        image: nginx:latest   # you can replace with your ECR image later
         ports:
-        - containerPort: 5000
-        env:
-        - name: PORT
-          value: "5000"
-        - name: ENVIRONMENT
-          value: "production"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 5000
-          initialDelaySeconds: 15
-          periodSeconds: 20
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 5000
-          initialDelaySeconds: 10
-          periodSeconds: 10
-        resources:
-          requests:
-            memory: "64Mi"
-            cpu: "100m"
-          limits:
-            memory: "256Mi"
-            cpu: "500m"
+        - containerPort: 80

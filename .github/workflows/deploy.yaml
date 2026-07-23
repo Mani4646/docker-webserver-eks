@@ -1,0 +1,52 @@
+name: Deploy to EKS
+
+on:
+  push:
+    branches:
+      - main   # trigger only on main branch pushes
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write   # required for OIDC
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Configure AWS credentials using OIDC role
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_DEV }}
+          aws-region: us-east-1
+
+      # Login to ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Build and push Docker image
+      - name: Build, tag, and push image
+        run: |
+          IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/nginx-app:${{ github.sha }}
+          docker build -t $IMAGE_URI .
+          docker push $IMAGE_URI
+        env:
+          IMAGE_URI: ${{ steps.login-ecr.outputs.registry }}/nginx-app:${{ github.sha }}
+
+      # Update kubeconfig for your cluster
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --region us-east-1 --name ${{ secrets.CLUSTER_NAME_DEV }}
+
+      # Deploy manifests
+      - name: Deploy to EKS
+        run: |
+          kubectl set image deployment/nginx-deployment nginx=${{ steps.login-ecr.outputs.registry }}/nginx-app:${{ github.sha }}
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service-clusterip.yaml
+          # swap with service-nodeport.yaml if you want external node IP access
