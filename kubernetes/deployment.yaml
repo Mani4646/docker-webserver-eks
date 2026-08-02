@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: nginx:latest   # you can replace with your ECR image later
+        image: 871315527319.dkr.ecr.us-east-1.amazonaws.com/nginx-app:${{ github.sha }}   # you can replace with your ECR image later
         ports:
         - containerPort: 80
