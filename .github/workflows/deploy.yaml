@@ -49,7 +49,7 @@ jobs:
       # Deploy manifests
       - name: Deploy to EKS
         run: |
-          # kubectl set image deployment/nginx-deployment nginx=${{ steps.login-ecr.outputs.registry }}/nginx-app:${{ github.sha }}
+          kubectl set image deployment/nginx-deployment nginx=871315527319.dkr.ecr.us-east-1.amazonaws.com/nginx-app:${GITHUB_SHA}
           kubectl apply -f kubernetes/deployment.yaml
           kubectl apply -f kubernetes/service-clusterip.yaml
           # swap with service-nodeport.yaml if you want external node IP access
