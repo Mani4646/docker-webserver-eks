@@ -42,6 +42,9 @@ jobs:
       - name: Update kubeconfig
         run: |
           aws eks update-kubeconfig --region us-east-1 --name ${{ secrets.CLUSTER_NAME_DEV }}
+      #Debug cluster access
+      - name: Debug cluster access
+        run: kubectl get ns
 
       # Deploy manifests
       - name: Deploy to EKS
